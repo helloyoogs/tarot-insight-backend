@@ -143,10 +143,11 @@ tarot_reading
 -------------
 id (PK)
 user_id (FK)
-card_id (FK)
+tarot_card_id (FK)
 question
 result_text
 created_at
+updated_at
 ```
 
 사용자가 뽑은 타로 카드 기록을 저장합니다.
