@@ -163,8 +163,10 @@ id (PK)
 user_id (FK)
 profile
 experience_year
+is_active
 rating
 created_at
+updated_at
 ```
 
 ---
@@ -179,7 +181,9 @@ user_id (FK)
 reader_id (FK)
 reservation_time
 status
+version
 created_at
+updated_at
 ```
 
 ### status

@@ -1,0 +1,17 @@
+package com.tarot.insight.domain.reservation.repository;
+
+import com.tarot.insight.domain.reader.entity.TarotReader;
+import com.tarot.insight.domain.reservation.entity.ConsultationReservation;
+import com.tarot.insight.domain.reservation.entity.ReservationStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDateTime;
+
+public interface ReservationRepository extends JpaRepository<ConsultationReservation, Long> {
+    // 특정 상담사에게 같은 시간, '예약됨' 상태의 데이터가 있는지 확인하는 쿼리
+    boolean existsByReaderAndReservationTimeAndStatus(
+            TarotReader reader,
+            LocalDateTime reservationTime,
+            ReservationStatus status
+    );
+}
