@@ -28,11 +28,21 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                // 1. SockJS 등의 iframe 허용을 위한 설정
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(auth -> auth
-                        // ✨ 이 부분에 Swagger 관련 주소("/swagger-ui/**", "/v3/api-docs/**")를 추가했습니다!
-                        .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // 2. 채팅 테스트 HTML 및 웹소켓 엔드포인트(ws-tarot) 허가
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/chat-test.html",  // 테스트 페이지
+                                "/ws-tarot/**",    // 웹소켓 연결 경로
+                                "/favicon.ico"     // 파비콘 에러 방지
+                        ).permitAll()
                         .anyRequest().authenticated()
-                ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
