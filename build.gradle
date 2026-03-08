@@ -49,6 +49,8 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 	// WebSocket & Messaging
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	// JUnit5, Mockito, AssertJ
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {

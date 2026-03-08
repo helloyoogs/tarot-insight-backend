@@ -34,7 +34,7 @@ public class TarotReader extends BaseTimeEntity {
     @Builder.Default
     private boolean isActive = true; // 현재 상담 가능 여부
 
-    public void updateRating(Double newRating) {
-        this.rating = newRating;
+    public void updateRating(Double rating) {
+        this.rating = rating;
     }
 }
