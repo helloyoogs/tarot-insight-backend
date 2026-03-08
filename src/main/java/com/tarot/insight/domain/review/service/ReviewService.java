@@ -17,21 +17,24 @@ public class ReviewService {
 
     @Transactional
     public void createReview(ReviewRequest request) {
-        // 1. 해당 예약 찾기
+        // 1. 예약 정보 확인 및 상태 변경
         ConsultationReservation reservation = reservationRepository.findById(request.getReservationId())
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
 
-        // 2. 상담 완료 처리 (상태 변경)
-        // Reservation 엔티티에 @Setter가 없다면 상태 변경 메서드를 추가하는 것이 좋습니다.
-        reservation.complete();
+        reservation.complete(); // 상태를 COMPLETED로 변경
 
-        // 3. 리뷰 저장
+        // 2. 리뷰 저장
         Review review = Review.builder()
                 .reservation(reservation)
                 .rating(request.getRating())
                 .comment(request.getComment())
                 .build();
-
         reviewRepository.save(review);
+
+        // 3. ✨ 상담사 평점 실시간 업데이트
+        Long readerId = reservation.getReader().getId();
+        Double averageRating = reviewRepository.getAverageRatingByReaderId(readerId);
+
+        reservation.getReader().updateRating(averageRating);
     }
 }
