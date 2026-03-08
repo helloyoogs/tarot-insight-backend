@@ -21,6 +21,7 @@ public class ChatService {
                 .roomId(message.getRoomId())
                 .sender(message.getSender())
                 .message(message.getMessage())
+                .type(message.getType()) // 메시지 타입도 같이 저장해야 나중에 구분하기 좋음.
                 .build();
 
         chatRepository.save(entity);
