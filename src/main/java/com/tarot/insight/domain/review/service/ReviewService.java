@@ -8,24 +8,25 @@ import com.tarot.insight.domain.review.dto.ReviewRequest;
 import com.tarot.insight.domain.review.entity.Review;
 import com.tarot.insight.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // [추가]
+import org.springframework.cache.annotation.CacheEvict; // [추가]
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j // [추가]
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReservationRepository reservationRepository;
-    private final TarotReaderRepository readerRepository; // 추가 필요
+    private final TarotReaderRepository readerRepository;
 
     @Transactional
     public void createReview(ReviewRequest request) {
-        // 1. 예약 정보 확인 및 상태 변경
         ConsultationReservation reservation = reservationRepository.findById(request.getReservationId())
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
         reservation.complete();
 
-        // 2. 리뷰 저장
         Review review = Review.builder()
                 .reservation(reservation)
                 .rating(request.getRating())
@@ -33,22 +34,26 @@ public class ReviewService {
                 .build();
         reviewRepository.save(review);
 
-        // 3. ✨ 평점 업데이트 로직 호출
         updateReaderRating(reservation.getReader().getId());
     }
 
-    // 테스트 코드에서 호출할 수 있도록 public으로 분리
+    /**
+     * 상담사 평점 갱신 및 관련 캐시 삭제
+     * value: 삭제할 캐시 이름 (TarotReaderService에서 설정한 이름과 같아야 함)
+     * allEntries = true: 'readers' 캐시 안에 있는 모든 데이터(전체 목록 등)를 싹 지움
+     */
     @Transactional
+    @CacheEvict(value = "readers", allEntries = true) // 평점이 바뀌면 캐시를 비웁니다.
     public void updateReaderRating(Long readerId) {
+        log.info(">>>> [캐시 삭제] 상담사(ID: {})의 평점이 갱신되어 'readers' 캐시를 초기화합니다.", readerId);
+
         TarotReader reader = readerRepository.findById(readerId)
                 .orElseThrow(() -> new IllegalArgumentException("상담사를 찾을 수 없습니다."));
 
-        // DB에서 평균값 가져오기 (JPQL 혹은 Stream 사용)
         Double averageRating = reviewRepository.getAverageRatingByReaderId(readerId);
-
         if (averageRating == null) averageRating = 0.0;
 
         reader.updateRating(averageRating);
-        readerRepository.save(reader); // 명시적 저장
+        readerRepository.save(reader);
     }
 }

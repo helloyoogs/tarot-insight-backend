@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/readers")
 @RequiredArgsConstructor
@@ -18,7 +16,7 @@ public class TarotReaderController {
     private final TarotReaderService tarotReaderService;
 
     @GetMapping
-    public ResponseEntity<List<TarotReaderResponse>> getAllReaders() {
+    public ResponseEntity<TarotReaderResponse[]> getAllReaders() {
         return ResponseEntity.ok(tarotReaderService.getAllReaders());
     }
 }
