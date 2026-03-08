@@ -51,6 +51,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	// JUnit5, Mockito, AssertJ
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	// Redis 사용을 위한 스타터 추가
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-json'
 }
 
 tasks.named('test') {

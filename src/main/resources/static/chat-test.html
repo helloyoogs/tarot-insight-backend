@@ -1,44 +1,65 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8"> <title>타로 채팅 테스트</title>
+    <meta charset="UTF-8">
+    <title>타로 채팅 테스트 - 앨리스 마스터 전용</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
-        #chat-box { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; background: #f9f9f9; }
-        .log { color: blue; font-size: 12px; }
+        body { font-family: 'Pretendard', sans-serif; padding: 20px; background-color: #f4f4f9; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        #chat-box { border: 1px solid #e1e1e1; height: 350px; overflow-y: scroll; padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 15px; }
+        .input-group { display: flex; gap: 8px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        #message { flex: 1; }
+        button { padding: 12px 20px; background: #6c5ce7; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #5b4cc4; }
+        .log { color: #6c5ce7; font-size: 13px; font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-<h2>🔮 타로 채팅 테스트</h2>
-<div>
-    <input type="text" id="sender" placeholder="닉네임" value="나그네">
-    <input type="text" id="message" placeholder="메시지 입력">
-    <button onclick="sendMessage()">전송</button>
+
+<div class="container">
+    <h2>🔮 타로 상담실 테스트 (Room: 1)</h2>
+    <div id="chat-box"></div>
+    <div class="input-group">
+        <input type="text" id="sender" placeholder="닉네임" value="앨리스" style="width: 100px;">
+        <input type="text" id="message" placeholder="상담 메시지를 입력하세요..." onkeypress="if(event.keyCode==13) sendMessage()">
+        <button onclick="sendMessage()">전송</button>
+    </div>
 </div>
-<div id="chat-box"></div>
 
 <script>
     let stompClient = null;
     const roomId = "1";
 
     function connect() {
-        const socket = new SockJS('/ws-tarot'); // 서버 설정과 일치해야 함
+        // [수정 완료] 인텔리제이 포트(63342)가 아닌 스프링 서버 포트(8080)로 직접 연결합니다.
+        const socket = new SockJS('http://localhost:8080/ws-tarot');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function (frame) {
             console.log('✅ 연결 성공:', frame);
-            addLog("서버에 연결되었습니다.");
+            addLog("서버에 성공적으로 연결되었습니다.");
 
+            // Redis를 거쳐서 오는 메시지를 구독합니다.
             stompClient.subscribe('/sub/chat/room/' + roomId, function (response) {
                 const content = JSON.parse(response.body);
                 const chatBox = document.getElementById('chat-box');
-                chatBox.innerHTML += `<p><strong>${content.sender}:</strong> ${content.message}</p>`;
+
+                // 메시지 표시 방식
+                chatBox.innerHTML += `<p><strong>${content.sender}:</strong> ${content.message || (content.sender + "님이 입장하셨습니다.")}</p>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
+
+            // 입장 알림 전송
+            stompClient.send("/pub/chat/message", {}, JSON.stringify({
+                'roomId': roomId, 'sender': document.getElementById('sender').value, 'type': 'ENTER'
+            }));
+
         }, function (error) {
             console.error('❌ 연결 실패:', error);
-            addLog("연결 실패: " + error);
+            addLog("연결 실패! (서버가 8080에서 켜져 있는지 확인하세요)");
         });
     }
 
@@ -46,11 +67,9 @@
         const sender = document.getElementById('sender').value;
         const message = document.getElementById('message').value;
 
-        if(!stompClient || !stompClient.connected) {
-            alert("서버와 연결되어 있지 않습니다.");
-            return;
-        }
+        if(!stompClient || !stompClient.connected || !message.trim()) return;
 
+        // /pub/chat/message 경로로 메시지를 보냅니다.
         stompClient.send("/pub/chat/message", {}, JSON.stringify({
             'roomId': roomId,
             'sender': sender,
@@ -62,10 +81,12 @@
 
     function addLog(msg) {
         const chatBox = document.getElementById('chat-box');
-        chatBox.innerHTML += `<p class="log">[시스템] ${msg}</p>`;
+        chatBox.innerHTML += `<div class="log">[시스템] ${msg}</div>`;
     }
 
-    connect(); // 페이지 로드 시 자동 연결
+    // 페이지 로드 시 자동 연결
+    connect();
 </script>
+
 </body>
 </html>
