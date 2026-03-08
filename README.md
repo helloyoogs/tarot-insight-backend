@@ -387,3 +387,68 @@ Docker 기반 컨테이너 배포를 적용합니다.
 - Redis 캐싱
 - JPA 기반 데이터 설계
 - AWS 기반 서비스 배포
+
+--------- 2026.03.08 업데이트 내역
+
+# 🔮 Tarot Insight (타로 인사이트)
+
+타로 카드를 기반으로 한 **온라인 타로 상담 및 실시간 리딩 플랫폼**입니다.  
+사용자는 랜덤으로 타로 카드를 뽑아 결과를 확인할 수 있으며, 전문 상담사와 **실시간 채팅 상담** 및 **예약 시스템**을 통해 깊이 있는 상담을 경험할 수 있습니다.
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Core:** Java 17, Spring Boot 3.x
+- **Security:** Spring Security, JWT (Stateless)
+- **Data:** Spring Data JPA, MySQL, QueryDSL
+- **Real-time:** WebSocket, STOMP, SockJS
+
+---
+
+## 🚀 Core Features
+
+### 1. User & Security
+- **JWT 기반 인증:** 로그인/회원가입 및 권한별 접근 제어 (User, Reader).
+- **프로필 관리:** 유저 및 상담사의 상세 프로필 관리.
+
+### 2. Tarot Reading
+- **랜덤 카드 알고리즘:** 78장의 카드 중 무작위 리딩 기능.
+- **히스토리 관리:** 본인이 뽑았던 카드와 리딩 내용을 영구 저장 및 조회.
+
+### 3. Reservation System
+- **실시간 예약:** 상담사별 가능 시간대에 맞춘 예약 신청.
+- **동시성 처리:** `@Version`을 활용한 낙관적 락(Optimistic Lock) 적용으로 중복 예약 방지.
+- **목록 조회:** 유저별 예약 내역 및 상담사별 상담 스케줄 관리.
+
+### 4. Real-time Chatting (WebSocket)
+- **STOMP 기반 채팅:** 예약된 시간에 맞춘 실시간 양방향 상담.
+- **메시지 영속화:** 상담 도중 오가는 메시지를 DB에 저장하여 상담 종료 후에도 복기 가능.
+- **SockJS 지원:** 웹소켓 미지원 브라우저 환경에서도 안정적인 연결 보장.
+
+### 5. Review & Rating
+- **상담 종료 프로세스:** 리뷰 작성 시 예약 상태가 자동으로 `COMPLETED`로 전환.
+- **평점 자동 집계:** 리뷰 등록 시 상담사의 평균 평점이 실시간으로 업데이트 및 프로필 반영.
+
+---
+
+## 🔌 API & System Architecture
+
+### WebSocket Endpoint
+- **Connection:** `/ws-tarot`
+- **Pub (메시지 전송):** `/pub/chat/message`
+- **Sub (메시지 수신):** `/sub/chat/room/{reservationId}`
+
+### Core API (Major)
+- `GET /api/reservations/my` : 내 예약 목록 확인
+- `POST /api/reviews` : 상담 리뷰 등록 및 평점 반영
+- `GET /api/readers` : 활성화된 상담사 목록 및 실시간 평점 조회
+
+---
+
+## 📈 Future Improvements (향후 과제)
+- **Redis Pub/Sub:** 다중 서버 환경을 위한 채팅 브로커 확장.
+- **Notification System:** 예약 시간 10분 전 알림 기능 (SSE 또는 FCM).
+- **S3 Image Upload:** 상담사 프로필 및 타로 카드 고화질 이미지 스토리지 연동.
+- **Statistic Dashboard:** 월간 상담 횟수 및 인기 상담사 랭킹 시스템.

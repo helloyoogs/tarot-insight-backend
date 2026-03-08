@@ -33,4 +33,8 @@ public class ConsultationReservation extends BaseTimeEntity {
 
     @Version // ✨ 낙관적 락: 동시에 같은 예약을 시도할 때 데이터 꼬임 방지
     private Long version;
+
+    public void complete() {
+        this.status = ReservationStatus.COMPLETED;
+    }
 }
