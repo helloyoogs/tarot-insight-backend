@@ -33,10 +33,6 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
@@ -49,12 +45,14 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 	// WebSocket & Messaging
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	// JUnit5, Mockito, AssertJ
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test' // JUnit 5, AssertJ 등 포함
+	testImplementation 'org.springframework.security:spring-security-test' // 보안 테스트용
 	// Redis 사용을 위한 스타터 추가
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-json'
+	// Redisson: Redis 분산 락 구현을 위한 라이브러리
+	implementation 'org.redisson:redisson:3.27.2'
 }
 
 tasks.named('test') {

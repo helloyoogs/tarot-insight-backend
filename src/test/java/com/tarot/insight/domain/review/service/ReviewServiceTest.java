@@ -1,9 +1,8 @@
-package com.tarot.insight.service;
+package com.tarot.insight.domain.review.service;
 
 import com.tarot.insight.domain.reader.entity.TarotReader;
 import com.tarot.insight.domain.reader.repository.TarotReaderRepository;
 import com.tarot.insight.domain.review.repository.ReviewRepository;
-import com.tarot.insight.domain.review.service.ReviewService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
