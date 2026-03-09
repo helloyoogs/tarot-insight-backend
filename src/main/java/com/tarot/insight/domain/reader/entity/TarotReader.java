@@ -1,6 +1,6 @@
 package com.tarot.insight.domain.reader.entity;
 
-import com.tarot.insight.domain.user.User;
+import com.tarot.insight.domain.user.entity.User;
 import com.tarot.insight.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;

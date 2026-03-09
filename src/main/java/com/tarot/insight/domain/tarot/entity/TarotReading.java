@@ -1,6 +1,6 @@
 package com.tarot.insight.domain.tarot.entity;
 
-import com.tarot.insight.domain.user.User;
+import com.tarot.insight.domain.user.entity.User;
 import com.tarot.insight.global.entity.BaseTimeEntity; // 생성시간 자동 저장을 위해 필요 (아래 설명 참고)
 import jakarta.persistence.*;
 import lombok.*;

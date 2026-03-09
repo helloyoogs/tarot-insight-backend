@@ -1,8 +1,8 @@
 package com.tarot.insight.domain.user.service;
 
-import com.tarot.insight.domain.user.User;
-import com.tarot.insight.domain.user.UserRepository;
-import com.tarot.insight.domain.user.UserRole;
+import com.tarot.insight.domain.user.entity.User;
+import com.tarot.insight.domain.user.repository.UserRepository;
+import com.tarot.insight.domain.user.entity.UserRole;
 import com.tarot.insight.domain.user.dto.LoginRequest;
 import com.tarot.insight.domain.user.dto.LoginResponse;
 import com.tarot.insight.domain.user.dto.SignupRequest;

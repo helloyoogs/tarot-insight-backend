@@ -1,6 +1,7 @@
 package com.tarot.insight.domain.chat.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties; // 추가
+import com.tarot.insight.domain.chat.entity.MessageType;
 import lombok.*;
 import java.io.Serializable;
 
@@ -17,8 +18,4 @@ public class ChatMessage implements Serializable {
     private String sender;
     private String message;
     private MessageType type;
-
-    public enum MessageType {
-        ENTER, TALK, QUIT
-    }
 }

@@ -1,5 +1,6 @@
-package com.tarot.insight.domain.user;
+package com.tarot.insight.domain.user.repository;
 
+import com.tarot.insight.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

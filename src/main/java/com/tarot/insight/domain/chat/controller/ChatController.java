@@ -1,6 +1,7 @@
 package com.tarot.insight.domain.chat.controller;
 
 import com.tarot.insight.domain.chat.dto.ChatMessage;
+import com.tarot.insight.domain.chat.entity.MessageType;
 import com.tarot.insight.domain.chat.service.RedisPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class ChatController {
         }
 
         // 2. 입장 메시지 설정
-        if (ChatMessage.MessageType.ENTER.equals(message.getType())) {
+        if (MessageType.ENTER.equals(message.getType())) {
             message.setMessage(message.getSender() + "님이 입장하셨습니다.");
         }
         // 3. Redis로 메시지 발행

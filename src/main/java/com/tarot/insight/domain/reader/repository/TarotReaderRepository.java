@@ -1,7 +1,7 @@
 package com.tarot.insight.domain.reader.repository;
 
 import com.tarot.insight.domain.reader.entity.TarotReader;
-import com.tarot.insight.domain.user.User;
+import com.tarot.insight.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;

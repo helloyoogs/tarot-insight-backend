@@ -1,7 +1,7 @@
 package com.tarot.insight.domain.reservation.entity;
 
 import com.tarot.insight.domain.reader.entity.TarotReader;
-import com.tarot.insight.domain.user.User;
+import com.tarot.insight.domain.user.entity.User;
 import com.tarot.insight.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;

@@ -5,9 +5,9 @@ import com.tarot.insight.domain.reader.repository.TarotReaderRepository;
 import com.tarot.insight.domain.reservation.dto.ReservationRequest;
 import com.tarot.insight.domain.reservation.repository.ReservationRepository;
 import com.tarot.insight.domain.review.repository.ReviewRepository; // 외래키 해결용 추가
-import com.tarot.insight.domain.user.User;
-import com.tarot.insight.domain.user.UserRepository;
-import com.tarot.insight.domain.user.UserRole;
+import com.tarot.insight.domain.user.entity.User;
+import com.tarot.insight.domain.user.repository.UserRepository;
+import com.tarot.insight.domain.user.entity.UserRole;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
