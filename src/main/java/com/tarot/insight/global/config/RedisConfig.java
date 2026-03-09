@@ -40,7 +40,7 @@ public class RedisConfig {
         template.setConnectionFactory(connectionFactory);
 
         // RedisSerializer.json()은 내부적으로 Bean으로 등록된 ObjectMapper를 사용하거나
-        // 기본 설정을 사용합니다.
+        // 기본 설정을 사용.
         template.setKeySerializer(RedisSerializer.string());
         template.setValueSerializer(RedisSerializer.json());
         template.setHashKeySerializer(RedisSerializer.string());
@@ -59,9 +59,9 @@ public class RedisConfig {
     }
 
     // 5. 메시지 리스너 어댑터
+    // 어댑터가 onMessage를 기본으로 호출하도록.
     @Bean
     public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
-        // subscriber의 sendMessage 메서드와 연결
-        return new MessageListenerAdapter(subscriber, "sendMessage");
+        return new MessageListenerAdapter(subscriber);
     }
 }
