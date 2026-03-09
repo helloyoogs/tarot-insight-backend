@@ -17,24 +17,34 @@ public class TarotReader extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 1:1 관계 - 한 명의 유저는 하나의 상담사 프로필만 가질 수 있습니다.
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
     @Column(columnDefinition = "TEXT")
-    private String profile; // 상담사 자기소개
+    private String profile;
 
-    private int experienceYears; // 경력 (년수)
+    private int experienceYears;
 
     @Builder.Default
-    private Double rating = 0.0; // 평균 평점
+    private Double rating = 0.0;
 
     @Column(name = "is_active")
     @Builder.Default
-    private boolean isActive = true; // 현재 상담 가능 여부
+    private boolean isActive = true;
 
+    // 기존 평점 업데이트 메서드
     public void updateRating(Double rating) {
         this.rating = rating;
+    }
+
+    /**
+     * 프로필 정보 수정 비즈니스 로직
+     * 외부에서 필드를 직접 수정(Setter)하지 못하게 하고,
+     * 의미 있는 메서드를 통해 데이터를 변경합니다.
+     */
+    public void updateProfile(String profile, int experienceYears) {
+        this.profile = profile;
+        this.experienceYears = experienceYears;
     }
 }
