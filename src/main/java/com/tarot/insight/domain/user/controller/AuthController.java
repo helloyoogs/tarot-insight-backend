@@ -3,7 +3,9 @@ package com.tarot.insight.domain.user.controller;
 import com.tarot.insight.domain.user.dto.LoginRequest;
 import com.tarot.insight.domain.user.dto.LoginResponse;
 import com.tarot.insight.domain.user.dto.SignupRequest;
+import com.tarot.insight.domain.user.service.AuthService;
 import com.tarot.insight.domain.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final UserService userService;
+    private final AuthService authService;
 
     // 회원가입 메서드
     @PostMapping("/signup")
@@ -38,5 +41,17 @@ public class AuthController {
 
         // 상태 코드 200(OK)과 함께 토큰을 반환합니다.
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        // Header에서 "Bearer "를 제외한 토큰 알맹이만 추출
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            String accessToken = bearerToken.substring(7);
+            authService.logout(accessToken);
+            return ResponseEntity.ok("성공적으로 로그아웃되었습니다.");
+        }
+        return ResponseEntity.badRequest().body("잘못된 요청입니다.");
     }
 }

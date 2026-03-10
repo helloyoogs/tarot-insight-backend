@@ -5,6 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -14,37 +16,47 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // 1. 요청 헤더에서 "Bearer "로 시작하는 토큰을 꺼냅니다.
+        // 1. 요청 헤더에서 토큰 추출
         String token = resolveToken(request);
 
-        // 2. 토큰이 존재하고, 유효하다면(위조되지 않았다면)
+        // 2. 토큰이 존재하고 기본 유효성 검사(위조/만료) 통과 시
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            // 3. 토큰에서 이메일을 꺼냅니다.
-            String email = jwtTokenProvider.getEmail(token);
 
-            // 4. 스프링 시큐리티에게 "이 사람은 인증된 사람이야!"라고 도장을 쾅 찍어줍니다.
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // 로그아웃 시 Redis에 토큰을 Key로 저장했으므로, 값이 존재하면 "이미 로그아웃된 토큰"입니다.
+            String isLogout = redisTemplate.opsForValue().get(token);
+
+            if (isLogout == null) { // 블랙리스트에 없을 때만 인증 처리 진행
+                // 3. 토큰에서 사용자 정보 추출
+                String email = jwtTokenProvider.getEmail(token);
+
+                // 4. 스프링 시큐리티 인증 정보 설정
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                log.warn("🚨 로그아웃된 토큰으로 접근 시도 차단: [{}]", token);
+                // SecurityContext를 설정하지 않고 넘어가므로, 이후 권한이 필요한 API 접근 시 자동으로 401/403 에러가 발생.
+            }
         }
 
-        // 5. 다음 작업(컨트롤러 등)으로 넘겨줍니다.
+        // 5. 다음 필터로 진행
         filterChain.doFilter(request, response);
     }
 
-    // 헤더에서 순수 토큰만 쏙 빼내는 유틸리티 메서드
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7); // "Bearer " (7글자) 이후의 진짜 토큰만 반환
+            return bearerToken.substring(7);
         }
         return null;
     }

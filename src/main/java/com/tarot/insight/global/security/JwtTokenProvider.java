@@ -57,4 +57,19 @@ public class JwtTokenProvider {
             return false;
         }
     }
+
+    // 토큰의 남은 유효 시간(만료 시간 - 현재 시간)을 계산하여 반환합니다.
+    public Long getExpiration(String token) {
+        // 토큰을 해독하여 만료 날짜를 가져옵니다.
+        Date expiration = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration();
+
+        // 현재 시간과의 차이를 밀리초(ms) 단위로 계산합니다.
+        long now = new Date().getTime();
+        return (expiration.getTime() - now);
+    }
 }
