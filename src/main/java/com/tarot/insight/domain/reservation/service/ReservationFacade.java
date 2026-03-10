@@ -21,26 +21,26 @@ public class ReservationFacade {
      * 분산 락을 적용한 예약 생성
      */
     public Long createReservation(String email, ReservationRequest request) {
-        // 락 키를 생성할 때 고유성.
         String lockKey = "lock:reader:" + request.getReaderId() + ":" + request.getReservationTime();
         RLock lock = redissonClient.getLock(lockKey);
 
         try {
-            // 대기 시간을 10초로 넉넉히 늘리고, 락 유지 시간도 충분히.
-            boolean available = lock.tryLock(10, 5, TimeUnit.SECONDS);
+            // 이렇게 하면 Redisson의 'Watchdog' 기능이 활성화되어 작업이 끝날 때까지 락을 안전하게 지켜줍니다.
+            boolean available = lock.tryLock(15, TimeUnit.SECONDS);
 
             if (!available) {
                 throw new RuntimeException("이미 예약이 진행 중입니다.");
             }
 
-            // 실제 서비스 호출 (여기서 예외가 발생해도 finally에서 락은 풀림.)
             return reservationService.createReservation(email, request);
 
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
+            // 반드시 현재 쓰레드가 락을 가지고 있을 때만 해제
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
         }
-    }}
+    }
+}
