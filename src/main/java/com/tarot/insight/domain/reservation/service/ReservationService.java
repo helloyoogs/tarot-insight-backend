@@ -2,6 +2,7 @@ package com.tarot.insight.domain.reservation.service;
 
 import com.tarot.insight.domain.reader.entity.TarotReader;
 import com.tarot.insight.domain.reader.repository.TarotReaderRepository;
+import com.tarot.insight.domain.reader.service.TarotReaderRankingService; // [추가] 랭킹 서비스 임포트
 import com.tarot.insight.domain.reservation.dto.ReservationRequest;
 import com.tarot.insight.domain.reservation.dto.ReservationResponse;
 import com.tarot.insight.domain.reservation.entity.ConsultationReservation;
@@ -24,6 +25,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final TarotReaderRepository tarotReaderRepository;
     private final UserRepository userRepository;
+    private final TarotReaderRankingService rankingService; // [추가] 랭킹 서비스 주입
 
     @Transactional
     public Long createReservation(String email, ReservationRequest request) {
@@ -33,12 +35,11 @@ public class ReservationService {
         TarotReader reader = tarotReaderRepository.findById(request.getReaderId())
                 .orElseThrow(() -> new IllegalArgumentException("상담사를 찾을 수 없습니다."));
 
-        // [수정 포인트] String 타입을 LocalDateTime으로 변환
-        // 테스트 코드에서 "2026-03-08 23:00" 형식으로 보내고 있으므로 그에 맞게 포맷 지정
+        // String 타입을 LocalDateTime으로 변환
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime reservationTime = LocalDateTime.parse(request.getReservationTime(), formatter);
 
-        // 2. ✨ 중복 예약 검증 (변환된 LocalDateTime 객체 사용)
+        // 2. 중복 예약 검증
         if (reservationRepository.existsByReaderAndReservationTimeAndStatus(
                 reader, reservationTime, ReservationStatus.RESERVED)) {
             throw new IllegalStateException("이미 예약된 시간입니다.");
@@ -48,11 +49,17 @@ public class ReservationService {
         ConsultationReservation reservation = ConsultationReservation.builder()
                 .user(user)
                 .reader(reader)
-                .reservationTime(reservationTime) // 변환된 객체 저장
+                .reservationTime(reservationTime)
                 .status(ReservationStatus.RESERVED)
                 .build();
 
-        return reservationRepository.save(reservation).getId();
+        Long reservationId = reservationRepository.save(reservation).getId();
+
+        // [랭킹 업데이트] 예약이 성공적으로 완료된 시점에 상담사의 인기 점수를 1점 올립니다.
+        // 닉네임을 기준으로 Redis ZSet에 저장됩니다.
+        rankingService.incrementScore(reader.getUser().getNickname());
+
+        return reservationId;
     }
 
     /**

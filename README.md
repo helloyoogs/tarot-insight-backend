@@ -11,6 +11,7 @@
 본 프로젝트는 백엔드 설계의 핵심인 **실시간성, 확장성, 정합성, 그리고 보안**을 해결하는 데 집중했습니다.
 
 * **고가용성 동시성 제어 (Redisson):** Redis 기반 분산 락을 구현하여 1:1 상담 예약의 중복 발생을 원천 차단. **100인 멀티쓰레드 테스트**를 통해 정합성 검증 완료.
+* **실시간 랭킹 시스템 (Redis ZSet):** Redis의 Sorted Set을 활용하여 예약 발생 시 실시간으로 상담사 순위를 산출. **O(log N)**의 성능으로 대규모 유저에게 실시간 인기 차트 제공.
 * **지능형 동적 검색 (QueryDSL):** 복잡한 상담사 필터링 기능을 `BooleanExpression` 조각으로 구현하여 유연성 극대화 및 **Fetch Join을 통한 N+1 문제 원천 차단.**
 * **성능 및 데이터 정합성 보장 (Cache-Aside & Evict):** 상담사 목록에 Redis 캐시를 적용하여 응답 속도를 극대화하고, 리뷰 작성 시 `@CacheEvict`를 통해 캐시와 DB 간의 정합성 유지.
 * **보안 고도화 (Refresh Token Rotation):** Access Token의 짧은 수명을 보완하기 위해 RTR(Rotation) 전략 도입. 재발급 시마다 Refresh Token을 갱신하여 토큰 탈취 위험 방어.
@@ -22,7 +23,7 @@
 
 ### Backend
 * **Core:** Java 17, **Spring Boot 4.0.3**
-* **Concurrency & Cache:** **Redisson (Distributed Lock)**, **Spring Cache (Redis)**
+* **Concurrency & Cache:** **Redisson (Distributed Lock)**, **Redis Sorted Set (Ranking)**, **Spring Cache (Redis)**
 * **Data:** Spring Data JPA, **QueryDSL 6.9 (Custom Repository Pattern)**, MySQL 8.0
 * **Security:** Spring Security, **JWT (Access/Refresh with Rotation)**, BCrypt, Redis Blacklist
 * **Docs:** Springdoc OpenAPI 3.0.2 (Swagger UI)
@@ -34,7 +35,7 @@
 ```mermaid
 graph TD
     Client[Client] -->|Auth / HTTP| Server[Spring Boot API Server]
-    Server -->|Blacklist / Rotation / Lock / Cache / Search| Redis[(Redis Memory)]
+    Server -->|Blacklist / Rotation / Lock / Cache / Ranking / Search| Redis[(Redis Memory)]
     Server -->|Auditing / Save| MySQL[(MySQL RDS)]
     Redis -->|Pub/Sub| Server
     Server -->|Real-time| Client
@@ -50,10 +51,13 @@ graph TD
 ### 4.2 Redisson 분산 예약 및 리뷰 캐싱
 * **Distributed Lock:** Facade 패턴을 활용하여 트랜잭션과 락의 생명주기를 분리. **Redisson Watchdog**을 활용해 작업 완료 시까지 락 유지 보장.
 
-### 4.3 QueryDSL 기반 지능형 필터링
+### 4.3 Redis Sorted Set 기반 실시간 랭킹
+* **Event-Driven Update:** 예약 생성 성공 시점에 `TarotReaderRankingService`를 호출하여 Redis ZSet 점수(Score) 자동 가산.
+* **Real-time Ranking:** DB `ORDER BY` 없이 인메모리 연산을 통해 상위 5인의 상담사 닉네임을 초고속으로 반환.
+
+### 4.4 QueryDSL 기반 지능형 필터링
 * **Custom Repository:** 인터페이스와 구현체(`Impl`)를 분리하는 정석 패턴 적용.
-* **Dynamic Query:** `nickname`, `minExperience`, `minRating` 등 선택적 파라미터를 조합한 동적 쿼리 수행.
-* **Performance:** 유저 엔티티와의 일대일 관계를 `fetchJoin`으로 처리하여 조회 성능 최적화.
+* **Dynamic Query:** `nickname`, `minExperience`, `minRating` 등 선택적 파라미터를 조합한 동적 쿼리 수행 및 `fetchJoin` 최적화.
 
 ---
 
@@ -79,6 +83,7 @@ graph TD
 * **`users`**: 사용자 정보 및 권한(UserRole) 관리
 * **`tarot_readers`**: 상담사 프로필 및 실시간 평점 관리
 * **`consultation_reservation`**: 예약 상태 및 분산 락 관리
+* **`review`**: 상담 서비스 품질 관리 및 캐시 무효화 트리거
 
 ---
 *Last Updated: 2026.03.10*
