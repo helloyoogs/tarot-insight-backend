@@ -13,31 +13,49 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
-    private final long expirationTime;
+    private final long accessTokenExpiration;  // Access Token 만료 시간
+    private final long refreshTokenExpiration; // Refresh Token 만료 시간
 
-    // application.yml에 적어둔 비밀키와 만료 시간을 가져옵니다.
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-time}") long expirationTime) {
+            @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
+            @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationTime = expirationTime;
+        this.accessTokenExpiration = accessTokenExpiration;
+        this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
-    // 유저의 이메일(혹은 ID)과 권한을 넣어서 새로운 토큰을 만들어내는 메서드
-    public String createToken(String email, String role) {
+    // 1. Access Token 생성 (30분 등 짧은 수명)
+    public String createAccessToken(String email, String role) {
+        return createToken(email, role, accessTokenExpiration);
+    }
+
+    // 2. Refresh Token 생성 (2주 등 긴 수명)
+    public String createRefreshToken(String email) {
+        // Refresh Token은 보안상 권한 정보(role)를 넣지 않는 것이 일반적입니다.
+        return createToken(email, null, refreshTokenExpiration);
+    }
+
+    // 3. 공통 토큰 생성 로직 (내부에서만 사용)
+    private String createToken(String email, String role, long expiration) {
         Date now = new Date();
-        Date validity = new Date(now.getTime() + expirationTime);
+        Date validity = new Date(now.getTime() + expiration);
 
-        return Jwts.builder()
-                .subject(email) // 토큰의 주인(주제)은 이메일
-                .claim("role", role) // 토큰 안에 유저의 권한 정보도 슬쩍 넣어둠
-                .issuedAt(now) // 발행 시간
-                .expiration(validity) // 만료 시간
-                .signWith(secretKey) // 서버의 비밀키로 도장 쾅! (위조 방지)
-                .compact();
+        var builder = Jwts.builder()
+                .subject(email)
+                .issuedAt(now)
+                .expiration(validity)
+                .signWith(secretKey);
+
+        // 권한 정보가 있는 경우에만 claim에 추가 (Access Token용)
+        if (role != null) {
+            builder.claim("role", role);
+        }
+
+        return builder.compact();
     }
 
-    // 토큰에서 이메일 꺼내기 (토큰 해독)
+    // 토큰에서 이메일 꺼내기
     public String getEmail(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
@@ -47,20 +65,18 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
-    // 토큰이 유효한지(위조/만료되지 않았는지) 검사
+    // 토큰 유효성 검사
     public boolean validateToken(String token) {
         try {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
-            // 유효하지 않은 토큰이면 false를 반환하여 입장을 막습니다.
             return false;
         }
     }
 
-    // 토큰의 남은 유효 시간(만료 시간 - 현재 시간)을 계산하여 반환합니다.
+    // 토큰 남은 시간 계산
     public Long getExpiration(String token) {
-        // 토큰을 해독하여 만료 날짜를 가져옵니다.
         Date expiration = Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
@@ -68,7 +84,6 @@ public class JwtTokenProvider {
                 .getPayload()
                 .getExpiration();
 
-        // 현재 시간과의 차이를 밀리초(ms) 단위로 계산합니다.
         long now = new Date().getTime();
         return (expiration.getTime() - now);
     }

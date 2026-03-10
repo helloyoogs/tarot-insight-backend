@@ -8,9 +8,12 @@ import com.tarot.insight.domain.user.dto.LoginResponse;
 import com.tarot.insight.domain.user.dto.SignupRequest;
 import com.tarot.insight.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate; // ✨ 추가
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit; // ✨ 추가
 
 @Service
 @RequiredArgsConstructor
@@ -19,48 +22,51 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final StringRedisTemplate redisTemplate; // ✨ Redis 주입 추가
 
-    // 회원가입 로직
     @Transactional
-    public Long signup(SignupRequest request) {
-        // 1. 이메일 중복 확인 (이미 있으면 에러 발생)
+    public void signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
-        // 2. 비밀번호 암호화 (SecurityConfig에서 만든 도구 사용)
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        // 3. 저장할 User 객체 조립 (Builder 패턴 활용)
         User user = User.builder()
                 .email(request.getEmail())
                 .password(encodedPassword)
                 .nickname(request.getNickname())
-                .role(UserRole.USER) // 가입 시 기본 권한은 일반 사용자(USER)
+                .role(UserRole.USER)
                 .build();
 
-        // 4. DB에 저장하고, 저장된 유저의 ID 번호를 반환
         User savedUser = userRepository.save(user);
-
-        return savedUser.getId();
     }
 
-    //로그인 로직
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest request) {
-        // 1. 이메일로 유저 찾기 (없으면 에러 발생)
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
 
-        // 2. 비밀번호 일치하는지 확인 (평문 비밀번호와 암호화된 비밀번호 비교)
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 3. 비밀번호가 맞다면 토큰 기계를 작동시켜 토큰 발급!
-        String token = jwtTokenProvider.createToken(user.getEmail(), user.getRole().name());
+        // Access Token (30분 수명)
+        String accessToken = jwtTokenProvider.createAccessToken(user.getEmail(), user.getRole().name());
 
-        // 4. 발급된 토큰을 응답 상자에 담아서 반환
-        return new LoginResponse(token);
+        // Refresh Token (14일 수명)
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
+
+        // 🛡️ [Redis 저장] Key: "RT:이메일", Value: "리프레시 토큰"
+        // 14일 뒤에는 Redis에서도 자동으로 삭제되도록 설정.
+        redisTemplate.opsForValue().set(
+                "RT:" + user.getEmail(),
+                refreshToken,
+                14, // 이 숫자는 yml 설정과 맞추는 것이 좋습니다.
+                TimeUnit.DAYS
+        );
+
+        // 발급된 2종 토큰을 응답 상자에 담아서 반환
+        return new LoginResponse(accessToken, refreshToken);
     }
 }
