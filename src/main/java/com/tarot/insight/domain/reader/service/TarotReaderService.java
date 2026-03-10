@@ -1,14 +1,17 @@
 package com.tarot.insight.domain.reader.service;
 
+import com.tarot.insight.domain.reader.dto.ReaderSearchCondition;
 import com.tarot.insight.domain.reader.dto.TarotReaderResponse;
-import com.tarot.insight.domain.reader.entity.TarotReader; // [추가] 엔티티 임포트
+import com.tarot.insight.domain.reader.entity.TarotReader;
 import com.tarot.insight.domain.reader.repository.TarotReaderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict; // [추가] 캐시 삭제용
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -45,5 +48,22 @@ public class TarotReaderService {
 
         // 데이터 업데이트 (Dirty Checking으로 자동 반영)
         reader.updateProfile(newProfile, years);
+    }
+
+    /**
+     * 3. 상담사 동적 검색 (QueryDSL 활용)
+     * 닉네임, 최소 경력, 최소 평점 등 복합 조건으로 검색합니다.
+     * 동적 검색은 조건이 매번 다르므로 보통 캐싱을 적용하지 않습니다.
+     */
+    @Transactional(readOnly = true)
+    public List<TarotReaderResponse> searchReaders(ReaderSearchCondition condition) {
+        log.info(">>>> [상담사 검색] 조건: 닉네임={}, 경력={}년 이상, 평점={}점 이상",
+                condition.getNickname(), condition.getMinExperience(), condition.getMinRating());
+
+        // QueryDSL Custom Repository 메서드 호출
+        return tarotReaderRepository.searchReaders(condition)
+                .stream()
+                .map(TarotReaderResponse::new)
+                .toList();
     }
 }

@@ -42,3 +42,6 @@ src/main/resources/application.properties
 
 # 로그 파일
 *.log
+
+# QueryDSL generated classes
+src/main/generated/

@@ -33,6 +33,7 @@ dependencies {
 
 	// 1. Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2'
+
 	// 2. QueryDSL
 	implementation 'io.github.openfeign.querydsl:querydsl-jpa:6.9'
 	annotationProcessor "io.github.openfeign.querydsl:querydsl-apt:6.9:jakarta"
@@ -51,6 +52,22 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+// QueryDSL QClass 생성 및 인식 설정 추가
+def querydslDir = "src/main/generated"
+
+sourceSets {
+	main.java.srcDirs += [ querydslDir ]
+}
+
+tasks.withType(JavaCompile) {
+	options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
+}
+
+// 빌드 시 생성된 폴더를 깨끗하게 비워줍니다.
+clean {
+	delete file(querydslDir)
 }
 
 tasks.named('test') {
