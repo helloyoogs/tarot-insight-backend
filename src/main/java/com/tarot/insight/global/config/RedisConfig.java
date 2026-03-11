@@ -2,9 +2,11 @@ package com.tarot.insight.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.tarot.insight.domain.chat.service.RedisSubscriber;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -12,20 +14,29 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.RedisSerializer;
-import com.tarot.insight.domain.chat.service.RedisSubscriber;
 
 @Configuration
 public class RedisConfig {
 
-    // 1. Redisson 설정 (분산 락용)
+    // 환경 변수에서 값을 읽어옵니다. (없으면 127.0.0.1, 6379를 기본값으로 사용)
+    @Value("${spring.data.redis.host:127.0.0.1}")
+    private String redisHost;
+
+    @Value("${spring.data.redis.port:6379}")
+    private int redisPort;
+
+    // 1. Redisson 설정 (도커 환경 대응 완료)
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+        // 🚀 "redis://redis:6379" 형태로 동적 변환됩니다.
+        config.useSingleServer()
+                .setAddress("redis://" + redisHost + ":" + redisPort);
+
         return Redisson.create(config);
     }
 
-    // 2. ✨ ObjectMapper Bean 등록 (채팅 서비스 및 JSON 변환용)
+    // 2. ✨ ObjectMapper Bean 등록 (채팅 및 JSON 변환용)
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -39,8 +50,6 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // RedisSerializer.json()은 내부적으로 Bean으로 등록된 ObjectMapper를 사용하거나
-        // 기본 설정을 사용.
         template.setKeySerializer(RedisSerializer.string());
         template.setValueSerializer(RedisSerializer.json());
         template.setHashKeySerializer(RedisSerializer.string());
@@ -59,7 +68,6 @@ public class RedisConfig {
     }
 
     // 5. 메시지 리스너 어댑터
-    // 어댑터가 onMessage를 기본으로 호출하도록.
     @Bean
     public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber);

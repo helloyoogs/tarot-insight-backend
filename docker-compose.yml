@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: tarot-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: tarot_db
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - tarot-network
+
+  redis:
+    image: redis/redis-stack:latest
+    container_name: tarot-redis
+    ports:
+      - "6379:6379"
+      - "8001:8001" # Redis Insight(시각화)용 포트
+    networks:
+      - tarot-network
+
+  app:
+    build: .
+    container_name: tarot-backend
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/tarot_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,metrics,prometheus
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+    networks:
+      - tarot-network
+
+networks:
+  tarot-network:
+    driver: bridge

@@ -52,6 +52,7 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 // QueryDSL QClass 생성 및 인식 설정 추가
