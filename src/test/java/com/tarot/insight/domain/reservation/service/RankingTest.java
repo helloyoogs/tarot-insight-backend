@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootTest
 class RankingTest {
@@ -17,13 +18,15 @@ class RankingTest {
     @Autowired private ReservationService reservationService;
     @Autowired private TarotReaderRepository tarotReaderRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("상담사 5명을 생성하고 예약 횟수를 다르게 하여 랭킹 데이터를 만든다")
     void setupRankingData() {
         // 1. 유저 1명 생성 (예약자용)
         User buyer = User.builder()
-                .email("buyer@test.com").nickname("예약자").password("password").role(UserRole.USER)
+                .email("buyer@test.com").nickname("예약자").password(passwordEncoder.encode("password")).role(UserRole.USER)
                 .build();
         userRepository.save(buyer);
 
@@ -41,7 +44,7 @@ class RankingTest {
     private void createReaderAndReservations(String nickname, int count) {
         // 상담사 유저 생성
         User readerUser = User.builder()
-                .email(nickname + "@test.com").nickname(nickname).password("password").role(UserRole.READER)
+                .email(nickname + "@test.com").nickname(nickname).password(passwordEncoder.encode("password")).role(UserRole.READER)
                 .build();
         userRepository.save(readerUser);
 

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>🔮 Tarot Ranking Monitor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body { font-family: 'Arial', sans-serif; background: #1a1a2e; color: #e94560; text-align: center; }
+        #ranking-list { list-style: none; padding: 0; font-size: 1.5em; }
+        .rank-item { margin: 10px; padding: 15px; border: 1px solid #e94560; border-radius: 10px; transition: all 0.3s; }
+        .new-update { background: #e94560; color: white; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+<h1>🔮 실시간 인기 상담사 TOP 5</h1>
+<div id="status">연결 중...</div>
+<ul id="ranking-list">
+    <li>아직 데이터가 없습니다. 예약을 진행해 보세요!</li>
+</ul>
+
+<script>
+    // 1. WebSocket 연결 (마스터님의 엔드포인트: /ws-tarot)
+    const socket = new SockJS('http://localhost:8080/ws-tarot');
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        document.getElementById('status').innerText = "🟢 실시간 연결 성공!";
+        console.log('Connected: ' + frame);
+
+        // 2. 랭킹 채널 구독 (마스터님의 설정: /sub/ranking)
+        stompClient.subscribe('/sub/ranking', function (response) {
+            const ranking = JSON.parse(response.body);
+            updateRankingUI(ranking);
+        });
+    });
+
+    function updateRankingUI(ranking) {
+        const list = document.getElementById('ranking-list');
+        list.innerHTML = ""; // 기존 목록 비우기
+
+        ranking.forEach((name, index) => {
+            const li = document.createElement('li');
+            li.className = "rank-item new-update";
+            li.innerText = `${index + 1}위: ${name}`;
+            list.appendChild(li);
+
+            // 2초 후 강조 효과 제거
+            setTimeout(() => { li.classList.remove('new-update'); }, 2000);
+        });
+    }
+</script>
+</body>
+</html>
