@@ -52,6 +52,11 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	// WebMvcTest/MockMvc, @MockBean 등 테스트 자동구성 명시
+	testImplementation 'org.springframework.boot:spring-boot-test'
+	testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
+	// Security 필터/인가 통합 테스트 지원
+	testImplementation 'org.springframework.security:spring-security-test'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
