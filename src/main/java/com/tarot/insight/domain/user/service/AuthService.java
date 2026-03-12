@@ -17,7 +17,7 @@ public class AuthService {
 
     private final StringRedisTemplate redisTemplate;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository; // ✨ 유저 권한 조회를 위해 추가!
+    private final UserRepository userRepository;
 
     // [기능 1] 로그아웃 (블랙리스트 처리)
     public void logout(String accessToken) {

@@ -36,7 +36,7 @@ public class RedisConfig {
         return Redisson.create(config);
     }
 
-    // 2. ✨ ObjectMapper Bean 등록 (채팅 및 JSON 변환용)
+    // 2. ObjectMapper Bean 등록 (채팅 및 JSON 변환용)
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();

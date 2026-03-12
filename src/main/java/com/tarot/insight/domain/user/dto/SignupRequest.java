@@ -1,7 +1,7 @@
 package com.tarot.insight.domain.user.dto;
 
 import com.tarot.insight.domain.user.entity.UserRole;
-import io.swagger.v3.oas.annotations.media.Schema; // ✨ Swagger 예시를 위해 추가
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -13,7 +13,7 @@ public class SignupRequest {
 
     @NotBlank(message = "이메일은 필수입니다.")
     @Email(message = "이메일 형식이 올바르지 않습니다.")
-    @Schema(example = "testuser@tarot.com") // ✨ Swagger에 보여줄 예시
+    @Schema(example = "testuser@tarot.com")
     private String email;
 
     @NotBlank(message = "비밀번호는 필수입니다.")

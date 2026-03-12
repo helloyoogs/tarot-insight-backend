@@ -24,7 +24,8 @@ public enum ErrorCode {
     RESERVATION_CANCEL_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "R003", "예약은 상담 시작 24시간 전까지만 취소할 수 있습니다."),
 
     // --- 상담사 관련 에러 (D) ---
-    READER_NOT_FOUND(HttpStatus.NOT_FOUND, "D001", "해당 상담사를 찾을 수 없습니다.");
+    READER_NOT_FOUND(HttpStatus.NOT_FOUND, "D001", "해당 상담사를 찾을 수 없습니다."),
+    READER_INACTIVE(HttpStatus.BAD_REQUEST, "D002", "현재 상담을 받을 수 없는 상담사입니다.");
 
     private final HttpStatus status; // HTTP 상태 코드 (예: 400, 404, 500)
     private final String code;       // 우리가 정한 고유 코드 (예: R002)

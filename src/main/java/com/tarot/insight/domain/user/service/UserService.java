@@ -8,12 +8,12 @@ import com.tarot.insight.domain.user.dto.LoginResponse;
 import com.tarot.insight.domain.user.dto.SignupRequest;
 import com.tarot.insight.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate; // ✨ 추가
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.TimeUnit; // ✨ 추가
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final StringRedisTemplate redisTemplate; // ✨ Redis 주입 추가
+    private final StringRedisTemplate redisTemplate;
 
     @Transactional
     public void signup(SignupRequest request) {

@@ -70,7 +70,14 @@ public class SecurityConfig {
                                 "/api/reservations/schedule"
                         ).hasRole("READER")
 
-                        // 4) 그 외 모든 요청은 인증만 필요 (ROLE 상관 X)
+                        // 4) ADMIN 권한 필요 (상담사 활성/비활성 제어)
+                        .requestMatchers(
+                                "/api/readers/*/activate",
+                                "/api/readers/*/deactivate",
+                                "/api/readers/admin"
+                        ).hasRole("ADMIN")
+
+                        // 5) 그 외 모든 요청은 인증만 필요 (ROLE 상관 X)
                         .anyRequest().authenticated()
                 )
                 // 예외 처리(필요하면 커스터마이징 가능)

@@ -33,7 +33,7 @@ public class RedisSubscriber implements MessageListener {
             messagingTemplate.convertAndSend(destination, chatMessage);
             log.info(">>>> [최종 발송] 목적지: {}", destination);
 
-            // 4. ✨ 드디어 비동기 DB 저장 호출!
+            // 4. 드디어 비동기 DB 저장 호출!
             // ChatService의 @Async 덕분에 DB 저장이 완료될 때까지 기다리지 않고
             // 이 onMessage 메서드는 즉시 종료됩니다.
             chatService.saveMessage(chatMessage);

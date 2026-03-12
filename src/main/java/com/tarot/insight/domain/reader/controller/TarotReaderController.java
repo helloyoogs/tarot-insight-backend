@@ -2,15 +2,14 @@ package com.tarot.insight.domain.reader.controller;
 
 import com.tarot.insight.domain.reader.dto.ReaderSearchCondition;
 import com.tarot.insight.domain.reader.dto.TarotReaderResponse;
-import com.tarot.insight.domain.reader.service.TarotReaderRankingService; // ✨ 추가
+import com.tarot.insight.domain.reader.dto.TarotReaderAdminResponse;
+import com.tarot.insight.domain.reader.service.TarotReaderRankingService;
 import com.tarot.insight.domain.reader.service.TarotReaderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -41,5 +40,25 @@ public class TarotReaderController {
     public ResponseEntity<List<String>> getTopRanking() {
         // Redis에서 0~4위까지의 닉네임 리스트를 가져옵니다.
         return ResponseEntity.ok(rankingService.getTopRanking());
+    }
+
+    @GetMapping("/admin")
+    @Operation(summary = "관리자용 상담사 전체 조회", description = "활성/비활성 상관없이 모든 상담사 정보를 isActive 상태와 함께 조회합니다.")
+    public ResponseEntity<List<TarotReaderAdminResponse>> getAllReadersForAdmin() {
+        return ResponseEntity.ok(tarotReaderService.getAllReadersForAdmin());
+    }
+
+    @PatchMapping("/{readerId}/activate")
+    @Operation(summary = "상담사 활성화", description = "관리자/내부용: 상담사를 활성화 상태로 전환합니다.")
+    public ResponseEntity<Void> activateReader(@PathVariable Long readerId) {
+        tarotReaderService.changeActiveStatus(readerId, true);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{readerId}/deactivate")
+    @Operation(summary = "상담사 비활성화", description = "관리자/내부용: 상담사를 비활성화 상태로 전환합니다.")
+    public ResponseEntity<Void> deactivateReader(@PathVariable Long readerId) {
+        tarotReaderService.changeActiveStatus(readerId, false);
+        return ResponseEntity.ok().build();
     }
 }

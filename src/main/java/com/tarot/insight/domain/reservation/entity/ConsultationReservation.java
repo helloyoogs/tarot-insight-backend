@@ -31,7 +31,7 @@ public class ConsultationReservation extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status; // RESERVED 등
 
-    @Version // ✨ 낙관적 락: 동시에 같은 예약을 시도할 때 데이터 꼬임 방지
+    @Version
     private Long version;
 
     public void complete() {

@@ -38,6 +38,11 @@ public class ReservationService {
         TarotReader reader = tarotReaderRepository.findById(request.getReaderId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.READER_NOT_FOUND));
 
+        // 상담사가 비활성 상태라면 예약 불가
+        if (!reader.isActive()) {
+            throw new BusinessException(ErrorCode.READER_INACTIVE);
+        }
+
         // String 타입을 LocalDateTime으로 변환
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime reservationTime = LocalDateTime.parse(request.getReservationTime(), formatter);

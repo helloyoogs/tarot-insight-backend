@@ -75,7 +75,7 @@
             .then(data => {
                 console.log(">>>> [성공] 가져온 데이터:", data);
                 data.forEach(msg => renderMessage(msg));
-                addLog("이전 대화 복구 완료 ✨");
+                addLog("이전 대화 복구 완료");
             })
             .catch(err => {
                 console.error("!!!! [실패] 이유:", err);

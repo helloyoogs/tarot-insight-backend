@@ -1,13 +1,12 @@
 package com.tarot.insight.domain.reader.service;
 
 import com.tarot.insight.domain.reader.dto.ReaderSearchCondition;
+import com.tarot.insight.domain.reader.dto.TarotReaderAdminResponse;
 import com.tarot.insight.domain.reader.dto.TarotReaderResponse;
 import com.tarot.insight.domain.reader.entity.TarotReader;
 import com.tarot.insight.domain.reader.repository.TarotReaderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +20,8 @@ public class TarotReaderService {
     private final TarotReaderRepository tarotReaderRepository;
 
     /**
-     * 1. 전체 상담사 목록 조회 (캐시 적용)
+     * 1. 전체 상담사 목록 조회 - 유저/리더용 (isActive=true만)
      */
-    @Cacheable(value = "readers", key = "'all'", cacheManager = "cacheManager")
     @Transactional(readOnly = true)
     public TarotReaderResponse[] getAllReaders() {
         log.info(">>>> [DB 직접 조회] Redis에 데이터가 없어 MySQL에서 상담사 목록을 가져옵니다.");
@@ -35,10 +33,8 @@ public class TarotReaderService {
     }
 
     /**
-     * 2. 상담사 프로필 수정 (캐시 삭제 로직 포함)
-     * 이 메서드가 실행되면 Redis에 저장된 'readers::all' 캐시가 자동으로 삭제.
+     * 2. 상담사 프로필 수정
      */
-    @CacheEvict(value = "readers", key = "'all'") // 데이터가 바뀌면 캐시를 비움.
     @Transactional
     public void updateReaderProfile(Long readerId, String newProfile, int years) {
         log.info(">>>> [프로필 수정] 상담사 ID {}의 정보를 수정하고 관련 캐시를 삭제합니다.", readerId);
@@ -48,6 +44,23 @@ public class TarotReaderService {
 
         // 데이터 업데이트 (Dirty Checking으로 자동 반영)
         reader.updateProfile(newProfile, years);
+    }
+
+    /**
+     * 2-1. 상담사 활성/비활성 토글 (관리자/내부용)
+     */
+    @Transactional
+    public void changeActiveStatus(Long readerId, boolean active) {
+        log.info(">>>> [상담사 활성상태 변경] 상담사 ID {} -> active={}", readerId, active);
+
+        TarotReader reader = tarotReaderRepository.findById(readerId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상담사입니다."));
+
+        if (active) {
+            reader.activate();
+        } else {
+            reader.deactivate();
+        }
     }
 
     /**
@@ -64,6 +77,17 @@ public class TarotReaderService {
         return tarotReaderRepository.searchReaders(condition)
                 .stream()
                 .map(TarotReaderResponse::new)
+                .toList();
+    }
+
+    /**
+     * 4. 관리자용: 모든 상담사 + 활성 상태 조회 (캐시 없이 항상 최신 데이터)
+     */
+    @Transactional(readOnly = true)
+    public List<TarotReaderAdminResponse> getAllReadersForAdmin() {
+        return tarotReaderRepository.findAll()
+                .stream()
+                .map(TarotReaderAdminResponse::new)
                 .toList();
     }
 }

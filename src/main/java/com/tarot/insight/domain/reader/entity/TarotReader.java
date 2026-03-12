@@ -47,4 +47,12 @@ public class TarotReader extends BaseTimeEntity {
         this.profile = profile;
         this.experienceYears = experienceYears;
     }
+
+    public void activate() {
+        this.isActive = true;
+    }
+
+    public void deactivate() {
+        this.isActive = false;
+    }
 }

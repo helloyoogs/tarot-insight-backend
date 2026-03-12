@@ -1,8 +1,9 @@
 package com.tarot.insight.domain.reader.service;
 
+import com.tarot.insight.domain.reader.repository.TarotReaderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.messaging.simp.SimpMessagingTemplate; // ✨ 추가
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +15,8 @@ import java.util.stream.Collectors;
 public class TarotReaderRankingService {
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final SimpMessagingTemplate messagingTemplate; // ✨ 실시간 알림 도구 주입
+    private final SimpMessagingTemplate messagingTemplate; // 실시간 알림 도구
+    private final TarotReaderRepository tarotReaderRepository;
     private static final String RANKING_KEY = "reader:ranking";
 
     /**
@@ -30,15 +32,22 @@ public class TarotReaderRankingService {
     }
 
     /**
-     * 2. 실시간 TOP 5 상담사 조회
+     * 2. 실시간 TOP 5 상담사 조회 (활성 상담사만)
      */
     public List<String> getTopRanking() {
         Set<Object> topReaders = redisTemplate.opsForZSet().reverseRange(RANKING_KEY, 0, 4);
 
         if (topReaders == null) return List.of();
 
+        // 현재 활성 상담사 닉네임 집합
+        var activeNicknames = tarotReaderRepository.findAllByIsActiveTrue()
+                .stream()
+                .map(reader -> reader.getUser().getNickname())
+                .collect(Collectors.toSet());
+
         return topReaders.stream()
                 .map(Object::toString)
+                .filter(activeNicknames::contains)
                 .collect(Collectors.toList());
     }
 }

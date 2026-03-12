@@ -3,7 +3,7 @@ package com.tarot.insight.domain.user.controller;
 import com.tarot.insight.domain.user.dto.LoginRequest;
 import com.tarot.insight.domain.user.dto.LoginResponse;
 import com.tarot.insight.domain.user.dto.SignupRequest;
-import com.tarot.insight.domain.user.dto.TokenRequest; // ✨ 추가
+import com.tarot.insight.domain.user.dto.TokenRequest;
 import com.tarot.insight.domain.user.service.AuthService;
 import com.tarot.insight.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
