@@ -4,6 +4,7 @@ import com.tarot.insight.domain.reservation.dto.ReservationRequest;
 import com.tarot.insight.domain.reservation.dto.ReservationResponse;
 import com.tarot.insight.domain.reservation.service.ReservationFacade; // [추가]
 import com.tarot.insight.domain.reservation.service.ReservationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,7 +23,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<String> createReservation(
             Authentication authentication,
-            @RequestBody ReservationRequest request) {
+            @Valid @RequestBody ReservationRequest request) {
 
         String email = authentication.getName();
 

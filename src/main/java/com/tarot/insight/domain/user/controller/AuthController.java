@@ -49,7 +49,7 @@ public class AuthController {
 
     // 토큰 재발급 API
     @PostMapping("/reissue")
-    public ResponseEntity<LoginResponse> reissue(@RequestBody TokenRequest tokenRequest) {
+    public ResponseEntity<LoginResponse> reissue(@Valid @RequestBody TokenRequest tokenRequest) {
         // DTO에서 리프레시 토큰을 꺼내 서비스로 전달합니다.
         LoginResponse response = authService.reissue(tokenRequest.getRefreshToken());
 

@@ -3,6 +3,7 @@ package com.tarot.insight.domain.tarot.controller;
 import com.tarot.insight.domain.tarot.dto.TarotReadingRequest;
 import com.tarot.insight.domain.tarot.dto.TarotReadingResponse;
 import com.tarot.insight.domain.tarot.service.TarotService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -20,7 +21,7 @@ public class TarotController {
     @PostMapping("/reading")
     public ResponseEntity<String> saveReading(
             Authentication authentication, // JWT 필터가 넣어준 인증 정보
-            @RequestBody TarotReadingRequest request) {
+            @Valid @RequestBody TarotReadingRequest request) {
 
         String email = authentication.getName(); // 토큰에서 이메일 추출
         Long readingId = tarotService.saveReading(email, request);
