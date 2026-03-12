@@ -32,11 +32,13 @@ public class UserService {
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
+        UserRole role = request.getRole() != null ? request.getRole() : UserRole.USER;
+
         User user = User.builder()
                 .email(request.getEmail())
                 .password(encodedPassword)
                 .nickname(request.getNickname())
-                .role(UserRole.USER)
+                .role(role)
                 .build();
 
         User savedUser = userRepository.save(user);

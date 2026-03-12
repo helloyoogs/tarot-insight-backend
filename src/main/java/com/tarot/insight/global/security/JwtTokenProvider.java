@@ -87,4 +87,16 @@ public class JwtTokenProvider {
         long now = new Date().getTime();
         return (expiration.getTime() - now);
     }
+
+    // 토큰에서 role 꺼내기
+    public String getRole(String token) {
+        var claims = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        Object role = claims.get("role");
+        return role != null ? role.toString() : null;
+    }
 }

@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -15,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -39,9 +42,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // 3. 토큰에서 사용자 정보 추출
                 String email = jwtTokenProvider.getEmail(token);
 
-                // 4. 스프링 시큐리티 인증 정보 설정
+                // 토큰에서 role 꺼내서 권한으로 변환
+                String role = jwtTokenProvider.getRole(token); // "USER" / "READER" / null
+                List<GrantedAuthority> authorities = Collections.emptyList();
+                if (role != null) {
+                    // hasRole("USER") → 내부적으로 "ROLE_USER"를 요구하므로 prefix 붙여줌
+                    authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+                }
+
+                // 4. 스프링 시큐리티 인증 정보 설정 (authorities 반드시 전달 → hasRole("USER") 통과)
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
+                        new UsernamePasswordAuthenticationToken(email, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
                 log.warn("🚨 로그아웃된 토큰으로 접근 시도 차단: [{}]", token);
