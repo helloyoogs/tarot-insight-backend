@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/reservations",
                                 "/api/reservations/my",
+                                "/api/reservations/*/cancel",
                                 "/api/reviews/**",
                                 "/api/tarot/reading",
                                 "/api/tarot/history",

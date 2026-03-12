@@ -90,9 +90,45 @@ public class ReservationService {
         TarotReader reader = tarotReaderRepository.findByUser(user)
                 .orElseThrow(() -> new BusinessException(ErrorCode.READER_NOT_FOUND));
 
+        // 취소된 예약은 스케줄에서 제외 (실제 상담이 예정된 슬롯만 노출)
         return reservationRepository.findAllByReaderIdOrderByReservationTimeAsc(reader.getId())
                 .stream()
+                .filter(reservation -> reservation.getStatus() == ReservationStatus.RESERVED)
                 .map(ReservationResponse::new)
                 .toList();
+    }
+
+    /**
+     * 유저용: 예약 취소 (상담 24시간 전까지만 가능)
+     */
+    @Transactional
+    public void cancelReservation(String email, Long reservationId) {
+        // 1. 유저 인증
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.UNAUTHORIZED));
+
+        // 2. 예약 조회
+        ConsultationReservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        // 3. 본인 소유 예약인지 검증
+        if (!reservation.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+        // 4. 이미 완료되었거나 취소된 예약은 취소 불가
+        if (reservation.getStatus() != ReservationStatus.RESERVED) {
+            throw new BusinessException(ErrorCode.RESERVATION_CANCEL_NOT_ALLOWED);
+        }
+
+        // 5. 24시간 이내인 경우 취소 불가
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime limit = reservation.getReservationTime().minusHours(24);
+        if (!now.isBefore(limit)) { // now >= reservationTime - 24h 이면 취소 불가
+            throw new BusinessException(ErrorCode.RESERVATION_CANCEL_NOT_ALLOWED);
+        }
+
+        // 6. 상태 변경 (CANCELLED)
+        reservation.cancel();
     }
 }

@@ -21,6 +21,7 @@ public enum ErrorCode {
     // --- 예약 관련 에러 (R) ---
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "R001", "예약 내역을 찾을 수 없습니다."),
     RESERVATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "R002", "해당 시간은 이미 예약이 완료되었습니다."),
+    RESERVATION_CANCEL_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "R003", "예약은 상담 시작 24시간 전까지만 취소할 수 있습니다."),
 
     // --- 상담사 관련 에러 (D) ---
     READER_NOT_FOUND(HttpStatus.NOT_FOUND, "D001", "해당 상담사를 찾을 수 없습니다.");

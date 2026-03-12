@@ -37,4 +37,8 @@ public class ConsultationReservation extends BaseTimeEntity {
     public void complete() {
         this.status = ReservationStatus.COMPLETED;
     }
+
+    public void cancel() {
+        this.status = ReservationStatus.CANCELLED;
+    }
 }

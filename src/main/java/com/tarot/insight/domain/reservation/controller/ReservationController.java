@@ -34,6 +34,15 @@ public class ReservationController {
         return ResponseEntity.ok("상담 예약이 성공적으로 완료되었습니다. 예약 번호: " + reservationId);
     }
 
+    @PatchMapping("/{reservationId}/cancel")
+    public ResponseEntity<String> cancelReservation(
+            Authentication authentication,
+            @PathVariable Long reservationId
+    ) {
+        reservationService.cancelReservation(authentication.getName(), reservationId);
+        return ResponseEntity.ok("예약이 성공적으로 취소되었습니다.");
+    }
+
     @GetMapping("/my")
     public ResponseEntity<List<ReservationResponse>> getMyReservations(Authentication authentication) {
         return ResponseEntity.ok(reservationService.getMyReservations(authentication.getName()));
