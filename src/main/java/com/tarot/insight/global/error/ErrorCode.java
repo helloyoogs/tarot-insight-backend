@@ -25,7 +25,10 @@ public enum ErrorCode {
 
     // --- 상담사 관련 에러 (D) ---
     READER_NOT_FOUND(HttpStatus.NOT_FOUND, "D001", "해당 상담사를 찾을 수 없습니다."),
-    READER_INACTIVE(HttpStatus.BAD_REQUEST, "D002", "현재 상담을 받을 수 없는 상담사입니다.");
+    READER_INACTIVE(HttpStatus.BAD_REQUEST, "D002", "현재 상담을 받을 수 없는 상담사입니다."),
+
+    // --- 데이터/콘텐츠 관련 에러 (T) ---
+    DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "T001", "요청하신 타로 콘텐츠를 찾을 수 없습니다.");
 
     private final HttpStatus status; // HTTP 상태 코드 (예: 400, 404, 500)
     private final String code;       // 우리가 정한 고유 코드 (예: R002)

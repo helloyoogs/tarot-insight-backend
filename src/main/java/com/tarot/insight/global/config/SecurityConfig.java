@@ -62,6 +62,7 @@ public class SecurityConfig {
                                 "/api/reviews/**",
                                 "/api/tarot/reading",
                                 "/api/tarot/history",
+                                "/api/tarot/themes/**",
                                 "/api/auth/logout"
                         ).hasRole("USER")
 

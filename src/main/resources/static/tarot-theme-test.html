@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>테마별 타로 콘텐츠 통합 테스트</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 24px;
+            background: #0b1020;
+            color: #f5f5ff;
+        }
+        h1, h2 {
+            color: #fdd26e;
+        }
+        .panel {
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            background: rgba(15, 20, 40, 0.9);
+        }
+        label {
+            display: inline-block;
+            margin: 6px 0;
+            font-size: 14px;
+        }
+        input, select, button, textarea {
+            font-family: inherit;
+            font-size: 14px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background: #141a2e;
+            color: #f5f5ff;
+        }
+        textarea {
+            min-height: 150px;
+            white-space: pre-wrap;
+        }
+        select {
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background: #141a2e;
+            color: #f5f5ff;
+        }
+        button {
+            margin-top: 8px;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #fdd26e, #ff8fd1);
+            color: #1b1025;
+            font-weight: 600;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+        .small {
+            font-size: 12px;
+            color: #b0b4d8;
+        }
+        .row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .row > div {
+            flex: 1;
+            min-width: 180px;
+        }
+        .output-title {
+            margin-top: 10px;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #9be7ff;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #222b4a;
+            font-size: 11px;
+            margin-left: 4px;
+            color: #fdd26e;
+        }
+    </style>
+</head>
+<body>
+<h1>테마별 타로 콘텐츠 통합 테스트</h1>
+
+<div class="panel">
+    <h2>공통 설정</h2>
+    <div class="row">
+        <div>
+            <label>
+                백엔드 Base URL
+                <input type="text" id="baseUrl" value="http://localhost:8080" />
+            </label>
+            <div class="small">예: http://localhost:8080</div>
+        </div>
+        <div>
+            <label>
+                JWT Access Token (USER)
+                <input type="text" id="accessToken" placeholder="Bearer 없이 토큰만 입력" />
+            </label>
+            <div class="small">/api/auth/login 으로 USER 로그인 후 받은 accessToken 그대로 입력</div>
+        </div>
+    </div>
+</div>
+
+<!-- 1. 연애운 -->
+<div class="panel">
+    <h2>1. 연애운 타로 &lt;/api/tarot/themes/love&gt; <span class="tag">POST</span></h2>
+    <div>
+        <label>
+            연애 상황 (situation)
+            <select id="loveSituation">
+                <option value="SOME">SOME - 썸</option>
+                <option value="REUNION">REUNION - 재회</option>
+                <option value="COUPLE">COUPLE - 커플</option>
+                <option value="SOLO">SOLO - 솔로</option>
+                <option value="CRUSH">CRUSH - 짝사랑</option>
+            </select>
+        </label>
+        <div class="small">
+            백엔드에는 코드(SOME/REUNION/COUPLE/SOLO/CRUSH)가 전달되고,<br />
+            응답에는 situationLabel(썸/재회/...) 과 잘려진 resultText 가 내려옵니다.
+        </div>
+        <button id="btnLove">연애운 뽑기</button>
+    </div>
+
+    <div class="output-title">요청 JSON</div>
+    <textarea id="loveRequest" readonly></textarea>
+
+    <div class="output-title">응답 JSON</div>
+    <textarea id="loveResponse" readonly></textarea>
+</div>
+
+<!-- 2. 월간 테마 운세 -->
+<div class="panel">
+    <h2>2. 월간 테마 운세 &lt;/api/tarot/themes/monthly&gt; <span class="tag">POST</span></h2>
+    <div>
+        <label>
+            테마 선택 (themeId)
+            <select id="themeId">
+                <option value="2">2 - 취업/이직운</option>
+                <option value="3">3 - 합격/승진운</option>
+                <option value="4">4 - 학업/성적운</option>
+                <option value="5">5 - 금전/사업운</option>
+                <option value="6">6 - 건강운</option>
+                <option value="7">7 - 대인관계</option>
+            </select>
+        </label>
+        <div class="small">
+            ThemeTarotRequest.themeId (2~7 범위)<br />
+            선택된 테마에서 랜덤 카드 1장, resultText 전체를 반환합니다.
+        </div>
+        <button id="btnMonthly">월간 테마 운세 뽑기</button>
+    </div>
+
+    <div class="output-title">요청 JSON</div>
+    <textarea id="monthlyRequest" readonly></textarea>
+
+    <div class="output-title">응답 JSON</div>
+    <textarea id="monthlyResponse" readonly></textarea>
+</div>
+
+<!-- 3. 오늘의 운세 -->
+<div class="panel">
+    <h2>3. 오늘의 운세 &lt;/api/tarot/themes/daily&gt; <span class="tag">GET</span></h2>
+    <div class="small">
+        TarotThemeService.drawDailyTarot() → themeId = 8 고정으로 랜덤 카드 1장.
+    </div>
+    <button id="btnDaily">오늘의 운세 뽑기</button>
+
+    <div class="output-title">요청 정보</div>
+    <textarea id="dailyRequest" readonly></textarea>
+
+    <div class="output-title">응답 JSON</div>
+    <textarea id="dailyResponse" readonly></textarea>
+</div>
+
+<script>
+    function buildHeaders() {
+        const token = document.getElementById("accessToken").value.trim();
+        const headers = {
+            "Content-Type": "application/json"
+        };
+        if (token) {
+            headers["Authorization"] = "Bearer " + token;
+        }
+        return headers;
+    }
+
+    function pretty(obj) {
+        try {
+            return JSON.stringify(obj, null, 2);
+        } catch (e) {
+            return String(obj);
+        }
+    }
+
+    document.getElementById("btnLove").addEventListener("click", async () => {
+        const baseUrl = document.getElementById("baseUrl").value.trim();
+        const situation = document.getElementById("loveSituation").value;
+
+        const reqBody = { situation };
+        document.getElementById("loveRequest").value = pretty(reqBody);
+        document.getElementById("loveResponse").value = "요청 중...";
+
+        try {
+            const res = await fetch(baseUrl + "/api/tarot/themes/love", {
+                method: "POST",
+                headers: buildHeaders(),
+                body: JSON.stringify(reqBody)
+            });
+
+            const text = await res.text();
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch {
+                json = { raw: text };
+            }
+
+            document.getElementById("loveResponse").value =
+                "HTTP " + res.status + "\n\n" + pretty(json);
+        } catch (e) {
+            document.getElementById("loveResponse").value =
+                "요청 실패:\n" + e.toString();
+        }
+    });
+
+    document.getElementById("btnMonthly").addEventListener("click", async () => {
+        const baseUrl = document.getElementById("baseUrl").value.trim();
+        const themeId = parseInt(document.getElementById("themeId").value, 10);
+
+        const reqBody = { themeId };
+        document.getElementById("monthlyRequest").value = pretty(reqBody);
+        document.getElementById("monthlyResponse").value = "요청 중...";
+
+        try {
+            const res = await fetch(baseUrl + "/api/tarot/themes/monthly", {
+                method: "POST",
+                headers: buildHeaders(),
+                body: JSON.stringify(reqBody)
+            });
+
+            const text = await res.text();
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch {
+                json = { raw: text };
+            }
+
+            document.getElementById("monthlyResponse").value =
+                "HTTP " + res.status + "\n\n" + pretty(json);
+        } catch (e) {
+            document.getElementById("monthlyResponse").value =
+                "요청 실패:\n" + e.toString();
+        }
+    });
+
+    document.getElementById("btnDaily").addEventListener("click", async () => {
+        const baseUrl = document.getElementById("baseUrl").value.trim();
+
+        document.getElementById("dailyRequest").value =
+            "GET " + baseUrl + "/api/tarot/themes/daily\n(Body 없음)";
+        document.getElementById("dailyResponse").value = "요청 중...";
+
+        try {
+            const res = await fetch(baseUrl + "/api/tarot/themes/daily", {
+                method: "GET",
+                headers: buildHeaders()
+            });
+
+            const text = await res.text();
+            let json;
+            try {
+                json = JSON.parse(text);
+            } catch {
+                json = { raw: text };
+            }
+
+            document.getElementById("dailyResponse").value =
+                "HTTP " + res.status + "\n\n" + pretty(json);
+        } catch (e) {
+            document.getElementById("dailyResponse").value =
+                "요청 실패:\n" + e.toString();
+        }
+    });
+</script>
+</body>
+</html>

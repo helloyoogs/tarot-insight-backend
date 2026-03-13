@@ -1,0 +1,136 @@
+-- ============================================================================
+-- Tarot Master Reference (설명용 메타 데이터)
+-- 이 파일은 실제로 실행되지 않는 "설명 전용" SQL 주석입니다.
+-- - themeCode / deckCode / cardNo 가 각각 무엇을 의미하는지 한 눈에 보기 위한 용도
+-- - card_data.sql 에서 사용하는 코드 값과 반드시 일치해야 합니다.
+-- ============================================================================
+
+-- --------------------------------------------------------------------------
+-- 1) themeCode 설명 (tarot_theme.theme_code)
+-- --------------------------------------------------------------------------
+-- LOVE     : 연애운
+-- JOB      : 취업/이직운
+-- SUCCESS  : 합격/승진운
+-- STUDY    : 학업/성적운
+-- WEALTH   : 금전/사업운
+-- HEALTH   : 건강운
+-- RELATION : 대인관계
+-- TODAY    : 오늘의 운세
+
+
+-- --------------------------------------------------------------------------
+-- 2) deckCode 설명 (tarot_deck.deck_code)
+-- --------------------------------------------------------------------------
+-- ROMANTIC   : Romantic Tarot
+-- WAITE      : Waite Tarot (Universal Waite)
+-- GOLDEN     : Golden Tarot
+-- WHITE_CATS : White Cats Tarot
+-- GILDED     : Gilded Tarot
+-- HERBAL     : Herbal Tarot
+-- SYMBOLON   : Symbolon Tarot
+-- MARSEILLE  : Marseille Tarot
+
+
+-- --------------------------------------------------------------------------
+-- 3) cardNo 설명 (tarot_cards.card_no)
+--    - 0 ~ 21  : 메이저 아르카나
+--    - 22 ~ 35 : Wands
+--    - 36 ~ 49 : Cups
+--    - 50 ~ 63 : Swords
+--    - 64 ~ 77 : Pentacles
+-- --------------------------------------------------------------------------
+
+-- 메이저 아르카나 (0 ~ 21)
+-- 0  : The Fool
+-- 1  : The Magician
+-- 2  : The High Priestess
+-- 3  : The Empress
+-- 4  : The Emperor
+-- 5  : The Hierophant
+-- 6  : The Lovers
+-- 7  : The Chariot
+-- 8  : Strength
+-- 9  : The Hermit
+-- 10 : Wheel of Fortune
+-- 11 : Justice
+-- 12 : The Hanged Man
+-- 13 : Death
+-- 14 : Temperance
+-- 15 : The Devil
+-- 16 : The Tower
+-- 17 : The Star
+-- 18 : The Moon
+-- 19 : The Sun
+-- 20 : Judgement
+-- 21 : The World
+
+-- Wands (22 ~ 35)
+-- 22 : Ace of Wands
+-- 23 : 2 of Wands
+-- 24 : 3 of Wands
+-- 25 : 4 of Wands
+-- 26 : 5 of Wands
+-- 27 : 6 of Wands
+-- 28 : 7 of Wands
+-- 29 : 8 of Wands
+-- 30 : 9 of Wands
+-- 31 : 10 of Wands
+-- 32 : Page of Wands
+-- 33 : Knight of Wands
+-- 34 : Queen of Wands
+-- 35 : King of Wands
+
+-- Cups (36 ~ 49)
+-- 36 : Ace of Cups
+-- 37 : 2 of Cups
+-- 38 : 3 of Cups
+-- 39 : 4 of Cups
+-- 40 : 5 of Cups
+-- 41 : 6 of Cups
+-- 42 : 7 of Cups
+-- 43 : 8 of Cups
+-- 44 : 9 of Cups
+-- 45 : 10 of Cups
+-- 46 : Page of Cups
+-- 47 : Knight of Cups
+-- 48 : Queen of Cups
+-- 49 : King of Cups
+
+-- Swords (50 ~ 63)
+-- 50 : Ace of Swords
+-- 51 : 2 of Swords
+-- 52 : 3 of Swords
+-- 53 : 4 of Swords
+-- 54 : 5 of Swords
+-- 55 : 6 of Swords
+-- 56 : 7 of Swords
+-- 57 : 8 of Swords
+-- 58 : 9 of Swords
+-- 59 : 10 of Swords
+-- 60 : Page of Swords
+-- 61 : Knight of Swords
+-- 62 : Queen of Swords
+-- 63 : King of Swords
+
+-- Pentacles (64 ~ 77)
+-- 64 : Ace of Pentacles
+-- 65 : 2 of Pentacles
+-- 66 : 3 of Pentacles
+-- 67 : 4 of Pentacles
+-- 68 : 5 of Pentacles
+-- 69 : 6 of Pentacles
+-- 70 : 7 of Pentacles
+-- 71 : 8 of Pentacles
+-- 72 : 9 of Pentacles
+-- 73 : 10 of Pentacles
+-- 74 : Page of Pentacles
+-- 75 : Knight of Pentacles
+-- 76 : Queen of Pentacles
+-- 77 : King of Pentacles
+
+-- ============================================================================
+-- 이 파일은 "참고용 문서"입니다.
+-- - 애플리케이션 기동 시 자동 실행 대상이 아니며,
+-- - card_data.sql, JSON 더미 데이터 등을 만들 때 참고 용도로만 사용하세요.
+-- ============================================================================
+

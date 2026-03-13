@@ -15,6 +15,9 @@ public class TarotCard {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "card_no")
+    private Integer cardNo; // 0~77 등 카드 번호
+
     @Column(nullable = false, unique = true)
     private String name; // 예: The Fool, The Magician
 
