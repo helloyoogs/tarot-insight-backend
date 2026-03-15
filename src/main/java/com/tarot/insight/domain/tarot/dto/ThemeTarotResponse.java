@@ -10,6 +10,7 @@ public class ThemeTarotResponse {
     private final Integer themeId;
     private final String themeName;
 
+    private final Long cardId;
     private final Integer cardNo;
     private final String cardName;
     private final String cardDescription;
